@@ -13,132 +13,11 @@ import { generateInputFor } from "./utils/inputGenerators";
 
 import VizRouter from "./components/viz/VizRouter";
 
-
+import { useAlgoPlayer } from "./hooks/useAlgoPlayer";
 
 // ─── CODE PANEL ───────────────────────────────────────────────────────────────
 const LANG_ACCENT={javascript:"border-yellow-500 text-yellow-400",python:"border-blue-500 text-blue-400",java:"border-orange-500 text-orange-400"};
 
-function CodePanel({algoKey,activeLine,lang,onLangChange}) {
-  const code=((codeByLang[algoKey]||{})[lang]||(codeByLang[algoKey]||{}).javascript)||[];
-  return (
-    <div className="bg-slate-950 rounded-lg border border-slate-800 overflow-hidden">
-      <div className="flex border-b border-slate-800">
-        {["javascript","python","java"].map(l=>(
-          <button key={l} onClick={()=>onLangChange(l)}
-            className={`px-3 py-1.5 text-[11px] font-semibold transition-colors border-b-2 capitalize ${lang===l?`${LANG_ACCENT[l]} bg-slate-900/60`:"border-transparent text-slate-500 hover:text-slate-300"}`}>
-            {l==="javascript"?"JS":l==="python"?"Python":"Java"}
-          </button>
-        ))}
-      </div>
-      <div className="font-mono text-xs leading-6 p-3 overflow-auto max-h-64">
-        {code.map((line,i)=>(
-          <motion.div key={`${lang}-${i}`} animate={{backgroundColor:activeLine===i?"rgba(59,130,246,0.18)":"transparent"}} transition={{duration:0.2}}
-            className="flex items-center gap-3 px-2 rounded min-h-[24px]">
-            <span className="text-slate-700 w-4 text-right select-none shrink-0">{i+1}</span>
-            <span className="whitespace-pre" style={{color:activeLine===i?"#93c5fd":"#94a3b8"}}>{line||" "}</span>
-            {activeLine===i&&<motion.span initial={{opacity:0}} animate={{opacity:1}} className="ml-auto text-blue-400 text-[10px] shrink-0">◀</motion.span>}
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── PROBLEM PANEL ────────────────────────────────────────────────────────────
-function ProblemPanel({algoKey}) {
-  const p=problemStatements[algoKey]; if(!p) return null;
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className={`text-xs font-bold px-2 py-0.5 rounded ${p.diffColor} bg-slate-900 border border-slate-700`}>{p.difficulty}</span>
-        <span className="text-[10px] text-slate-500 font-mono">{p.platform}</span>
-      </div>
-      <p className="text-xs text-slate-300 leading-relaxed">{p.description}</p>
-      <div>
-        <div className="text-[10px] text-slate-500 uppercase tracking-widest mb-1.5">Constraints</div>
-        <ul className="space-y-1">{p.constraints.map((c,i)=>(
-          <li key={i} className="text-[11px] text-slate-400 font-mono flex items-start gap-2">
-            <span className="text-slate-600 mt-0.5">·</span><span>{c}</span>
-          </li>
-        ))}</ul>
-      </div>
-      <div>
-        <div className="text-[10px] text-slate-500 uppercase tracking-widest mb-1.5">Examples</div>
-        {p.examples.map((ex,i)=>(
-          <div key={i} className="bg-slate-900 border border-slate-800 rounded-lg p-3 space-y-1 mb-2">
-            <div className="text-[11px] font-mono"><span className="text-slate-500">Input:  </span><span className="text-slate-300">{ex.input}</span></div>
-            <div className="text-[11px] font-mono"><span className="text-slate-500">Output: </span><span className="text-emerald-400">{ex.output}</span></div>
-            <div className="text-[11px] text-slate-500 italic border-t border-slate-800 pt-1 mt-1">{ex.reason}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── VARIABLES PANEL ─────────────────────────────────────────────────────────
-function VariablesPanel({variables}) {
-  return (
-    <div className="grid grid-cols-2 gap-2">
-      {Object.entries(variables||{}).map(([k,v])=>(
-        <motion.div key={k} layout className="bg-slate-900 border border-slate-700 rounded px-3 py-2">
-          <div className="text-[10px] text-slate-500 font-mono">{k}</div>
-          <div className="text-xs text-cyan-300 font-mono truncate">{typeof v==="object"?JSON.stringify(v):String(v)}</div>
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
-// ─── SIDEBAR ──────────────────────────────────────────────────────────────────
-const catIcons={
-  "Arrays":<svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current" strokeWidth={1.5}><rect x="3" y="8" width="4" height="8" rx="1"/><rect x="10" y="5" width="4" height="11" rx="1"/><rect x="17" y="3" width="4" height="13" rx="1"/></svg>,
-  "Sorting":<svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current" strokeWidth={1.5}><path d="M3 6h18M6 12h12M9 18h6"/></svg>,
-  "Graphs":<svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current" strokeWidth={1.5}><circle cx="5" cy="12" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><path d="M7 12h5l7-7M7 12h5l7 7"/></svg>,
-  "Backtracking":<svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current" strokeWidth={1.5}><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/></svg>,
-  "DP":<svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current" strokeWidth={1.5}><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="17" y="3" width="4" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/></svg>,
-};
-
-function Sidebar({selectedAlgo,onSelect}) {
-  const [expanded,setExpanded]=useState(Object.fromEntries(Object.keys(categories).map(k=>[k,true])));
-  return (
-    <div className="w-52 flex-shrink-0 bg-slate-950 border-r border-slate-800 flex flex-col">
-      <div className="p-4 border-b border-slate-800">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
-            <svg viewBox="0 0 24 24" className="w-3 h-3 fill-white"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-          </div>
-          <span className="font-bold text-sm text-white tracking-tight">AlgoLab</span>
-        </div>
-        <p className="text-[10px] text-slate-500 mt-1">DSA Learning Platform</p>
-      </div>
-      <div className="flex-1 overflow-auto py-2">
-        {Object.entries(categories).map(([cat,algos])=>(
-          <div key={cat}>
-            <button onClick={()=>setExpanded(e=>({...e,[cat]:!e[cat]}))}
-              className="w-full flex items-center gap-2 px-4 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-widest hover:text-slate-200 transition-colors">
-              <span className="text-slate-500">{catIcons[cat]}</span>
-              <span>{cat}</span>
-              <motion.span animate={{rotate:expanded[cat]?90:0}} className="ml-auto text-slate-600 text-sm">›</motion.span>
-            </button>
-            <AnimatePresence>
-              {expanded[cat]&&(
-                <motion.div initial={{height:0,opacity:0}} animate={{height:"auto",opacity:1}} exit={{height:0,opacity:0}} transition={{duration:0.18}} className="overflow-hidden">
-                  {algos.map(id=>(
-                    <button key={id} onClick={()=>onSelect(id)}
-                      className={`w-full text-left px-7 py-1 text-[11px] transition-colors leading-snug ${selectedAlgo===id?"text-blue-400 bg-blue-950/50 border-r-2 border-blue-500":"text-slate-400 hover:text-slate-200 hover:bg-slate-900"}`}>
-                      {algoMeta[id]?.name}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 // ─── INPUT BAR ────────────────────────────────────────────────────────────────
 
@@ -146,108 +25,26 @@ function Sidebar({selectedAlgo,onSelect}) {
 
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 export default function App() {
-  const [selectedAlgo,setSelectedAlgo]=useState("two-sum-hash");
-  const [steps,setSteps]=useState([]);
-  const [stepIdx,setStepIdx]=useState(0);
-  const [playing,setPlaying]=useState(false);
-  const [speed,setSpeed]=useState(700);
-  const [customInput,setCustomInput]=useState("2,7,11,15,3,6,4,1");
-  const [target,setTarget]=useState(9);
-  const [bsTarget,setBsTarget]=useState(0);
-  const [coinAmount,setCoinAmount]=useState(15);
-  const [nQueensN,setNQueensN]=useState(4);
-  const [graphInput,setGraphInput]=useState(PRESET_GRAPHS.default);
-  const [graphError,setGraphError]=useState("");
-  const [inputError,setInputError]=useState("");
-  const [isLoading,setIsLoading]=useState(false);
-  const [lang,setLang]=useState("javascript");
-  const [rightTab,setRightTab]=useState("explain");
-  const intervalRef=useRef(null);
-
-  const meta=algoMeta[selectedAlgo]||{};
-  const step=steps[stepIdx];
-  const isGraph=GRAPH_ALGO_IDS.has(selectedAlgo);
-  const isGrid=GRID_ALGO_IDS.has(selectedAlgo);
-  const isBoard=BOARD_ALGO_IDS.has(selectedAlgo);
-  const isDP=DP_ALGO_IDS.has(selectedAlgo);
-  const isString=STRING_ALGO_IDS.has(selectedAlgo);
-  const isTwoSum=TWOSUM_IDS.has(selectedAlgo);
-  const isBSRotated=selectedAlgo==="binary-search-rotated";
-  const fixedInput=isGrid||isBoard;
-
-  const runAlgo=useCallback((algoId,input,extraParams={})=>{
-    setIsLoading(true); setPlaying(false);
-    setTimeout(()=>{
-      try {
-        const a=algorithms[algoId]; let result;
-        if(isGraph||GRAPH_ALGO_IDS.has(algoId)) result=a.generate(extraParams.graph||null);
-        else if(GRID_ALGO_IDS.has(algoId)||BOARD_ALGO_IDS.has(algoId)) {
-          if(algoId==="n-queens") result=a.generate(extraParams.n||4);
-          else result=a.generate();
-        } else if(DP_ALGO_IDS.has(algoId)) {
-          const nums=typeof input==="string"?input.split(",").map(x=>parseInt(x.trim())).filter(x=>!isNaN(x)):input;
-          result=a.generate(nums,extraParams.amount||15);
-        } else if(STRING_ALGO_IDS.has(algoId)) result=a.generate(typeof input==="string"?input:"abcabcbb");
-        else {
-          const nums=typeof input==="string"?input.split(",").map(x=>parseInt(x.trim())).filter(x=>!isNaN(x)):input;
-          if(algoId==="two-sum-brute"||algoId==="two-sum-hash") result=a.generate(nums,extraParams.target??9);
-          else if(algoId==="binary-search-rotated") result=a.generate(nums,extraParams.bsTarget??0);
-          else result=a.generate(nums);
-        }
-        setSteps(result||[]); setStepIdx(0);
-      } catch(e) { console.error(e); }
-      setIsLoading(false);
-    },200);
-  },[]);
-
-  useEffect(()=>{
-    setCustomInput(generateInputFor(selectedAlgo,"random")||"2,7,11,15,3,6,4,1");
-    runAlgo(selectedAlgo, generateInputFor(selectedAlgo,"random")||"2,7,11,15,3,6,4,1",{target,bsTarget,amount:coinAmount,n:nQueensN});
-  },[selectedAlgo]);
-
-  useEffect(()=>{
-    if(playing) {
-      intervalRef.current=setInterval(()=>{
-        setStepIdx(i=>{ if(i>=steps.length-1){setPlaying(false);return i;} return i+1; });
-      },speed);
-    }
-    return ()=>clearInterval(intervalRef.current);
-  },[playing,speed,steps.length]);
-
-  useEffect(()=>{
-    const h=(e)=>{
-      if(e.key==="ArrowRight") setStepIdx(i=>Math.min(i+1,steps.length-1));
-      if(e.key==="ArrowLeft") setStepIdx(i=>Math.max(i-1,0));
-      if(e.key===" "){e.preventDefault();setPlaying(p=>!p);}
-    };
-    window.addEventListener("keydown",h);
-    return ()=>window.removeEventListener("keydown",h);
-  },[steps.length]);
-
-  const handleRun=()=>{
-    setInputError(""); setGraphError("");
-    if(isGraph) {
-      const parsed=parseGraphInput(graphInput);
-      if(!parsed){setGraphError("Invalid. Use: 0:1,2 1:3 2: (space-separated)");return;}
-      runAlgo(selectedAlgo,null,{graph:parsed}); return;
-    }
-    if(fixedInput) { runAlgo(selectedAlgo,null,{n:nQueensN}); return; }
-    if(isString) { runAlgo(selectedAlgo,customInput); return; }
-    const nums=customInput.split(",").map(x=>parseInt(x.trim()));
-    if(nums.some(isNaN)||nums.length<1){setInputError("Enter comma-separated integers");return;}
-    if(nums.length>25){setInputError("Max 25 elements");return;}
-    runAlgo(selectedAlgo,customInput,{target,bsTarget,amount:coinAmount});
-  };
-
-  const handleGenerate=(type)=>{
-    if(isGraph){ const v=PRESET_GRAPHS[type]||PRESET_GRAPHS.default; setGraphInput(v); const p=parseGraphInput(v); if(p) runAlgo(selectedAlgo,null,{graph:p}); return; }
-    if(fixedInput) return;
-    const val=generateInputFor(selectedAlgo,type);
-    setCustomInput(val);
-    if(isString) { runAlgo(selectedAlgo,val); return; }
-    const nums=typeof val==="string"?val.split(",").map(x=>parseInt(x.trim())).filter(x=>!isNaN(x)):val;
-    runAlgo(selectedAlgo,nums,{target,bsTarget,amount:coinAmount});
-  };
+  const [selectedAlgo, setSelectedAlgo] = useState("two-sum-hash");
+  const meta = algoMeta[selectedAlgo] || {};
+  const {
+    steps, stepIdx, setStepIdx, step,
+    playing, setPlaying,
+    speed, setSpeed,
+    customInput, setCustomInput,
+    target, setTarget,
+    bsTarget, setBsTarget,
+    coinAmount, setCoinAmount,
+    nQueensN, setNQueensN,
+    graphInput, setGraphInput,
+    graphError, inputError,
+    isLoading,
+    lang, setLang,
+    rightTab, setRightTab,
+    isGraph, isGrid, isBoard, isDP, isString, isTwoSum, isBSRotated, fixedInput,
+    handleRun, handleGenerate,
+    PRESET_GRAPHS,
+  } = useAlgoPlayer(selectedAlgo);
 
   return (
     <div className="flex h-screen bg-slate-900 text-white overflow-hidden" style={{fontFamily:"'JetBrains Mono','Fira Code',monospace"}}>
