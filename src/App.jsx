@@ -1,19 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
-import { categories }        from "./constants/categories";
-import { algoMeta }          from "./constants/algoMeta";
-import { problemStatements } from "./constants/problemStatements";
-import { codeByLang }        from "./constants/codeByLang";
-import { PRESET_GRAPHS, GRAPH_ALGO_IDS, GRID_ALGO_IDS, BOARD_ALGO_IDS, DP_ALGO_IDS, STRING_ALGO_IDS, TWOSUM_IDS } from "./constants/graphPresets";
-
-import { algorithms }       from "./utils/algorithms";
-import { parseGraphInput, buildLayout, buildEdges } from "./utils/graphHelpers";
-import { generateInputFor } from "./utils/inputGenerators";
-
-import VizRouter from "./components/viz/VizRouter";
-
+import { algoMeta } from "./constants/algoMeta";
 import { useAlgoPlayer } from "./hooks/useAlgoPlayer";
+import Sidebar from "./components/Sidebar";
+import VizRouter from "./components/viz/VizRouter";
+import CodePanel from "./components/CodePanel";
+import ProblemPanel from "./components/ProblemPanel";
+import VariablesPanel from "./components/VariablesPanel";
 
 // ─── CODE PANEL ───────────────────────────────────────────────────────────────
 const LANG_ACCENT={javascript:"border-yellow-500 text-yellow-400",python:"border-blue-500 text-blue-400",java:"border-orange-500 text-orange-400"};
