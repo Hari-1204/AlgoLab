@@ -1,0 +1,17 @@
+export const algoMeta = {
+  "two-sum-brute":         { name:"Two Sum (Brute Force)",   timeComplexity:"O(n²)",         spaceComplexity:"O(1)",      note:"Nested loops — impractical for n > 10⁴" },
+  "two-sum-hash":          { name:"Two Sum (Hashmap)",        timeComplexity:"O(n)",           spaceComplexity:"O(n)",      note:"Hash map gives O(1) lookup per element" },
+  "sliding-window":        { name:"Longest Substring",        timeComplexity:"O(n)",           spaceComplexity:"O(k)",      note:"Sliding window avoids recomputation" },
+  "kadane":                { name:"Kadane's Algorithm",       timeComplexity:"O(n)",           spaceComplexity:"O(1)",      note:"Single pass — optimal for max subarray" },
+  "trapping-rain":         { name:"Trapping Rain Water",      timeComplexity:"O(n)",           spaceComplexity:"O(1)",      note:"Two-pointer approach — no extra arrays" },
+  "next-greater":          { name:"Next Greater Element",     timeComplexity:"O(n)",           spaceComplexity:"O(n)",      note:"Monotonic stack processes each element once" },
+  "binary-search-rotated": { name:"Binary Search (Rotated)", timeComplexity:"O(log n)",       spaceComplexity:"O(1)",      note:"Modified binary search identifies sorted half" },
+  "merge-sort":            { name:"Merge Sort",               timeComplexity:"O(n log n)",     spaceComplexity:"O(n)",      note:"Stable, guaranteed O(n log n) always" },
+  "quick-sort":            { name:"Quick Sort",               timeComplexity:"O(n log n) avg", spaceComplexity:"O(log n)",  note:"O(n²) worst case with bad pivot" },
+  "bfs":                   { name:"BFS",                      timeComplexity:"O(V+E)",         spaceComplexity:"O(V)",      note:"Level-order traversal, shortest path" },
+  "dfs":                   { name:"DFS",                      timeComplexity:"O(V+E)",         spaceComplexity:"O(V)",      note:"Deep traversal, foundation of many algorithms" },
+  "bfs-shortest":          { name:"BFS Shortest Path",        timeComplexity:"O(V+E)",         spaceComplexity:"O(V)",      note:"BFS guarantees shortest path in unweighted graphs" },
+  "number-of-islands":     { name:"Number of Islands",        timeComplexity:"O(m×n)",         spaceComplexity:"O(m×n)",    note:"DFS flood-fill marks visited land cells" },
+  "n-queens":              { name:"N-Queens",                 timeComplexity:"O(n!)",          spaceComplexity:"O(n²)",     note:"Backtracking prunes invalid placements early" },
+  "coin-change":           { name:"Coin Change (DP)",         timeComplexity:"O(amount×n)",    spaceComplexity:"O(amount)", note:"Bottom-up DP builds optimal substructure" },
+};
